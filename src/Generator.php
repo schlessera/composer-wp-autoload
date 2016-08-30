@@ -8,7 +8,7 @@
  * @link      https://www.alainschlesser.com/
  * @copyright 2016 Alain Schlesser
  *
- * Based on xrstf/composer-php52 by Christoph Mewes.
+ * Partially based on xrstf/composer-php52 by Christoph Mewes.
  * @see       https://github.com/composer-php52/composer-php52
  */
 
@@ -29,7 +29,7 @@ use Composer\Script\Event;
 class Generator
 {
 
-    public static function onPostInstallCmd(Event $event)
+    public static function dump(Event $event)
     {
         $composer            = $event->getComposer();
         $installationManager = $composer->getInstallationManager();
@@ -49,15 +49,15 @@ class Generator
 
         $suffix = $config->get('autoloader-suffix');
 
-        $extra             = $event->getComposer()->getPackage()->getExtra();
-        $sourcePrefix      = isset($extra['wordpress-autoloader']['source-prefix'])
-            ? $extra['wordpress-autoloader']['source-prefix']
-            : "'src/'";
-        $destinationPrefix = isset($extra['wordpress-autoloader']['destination-prefix'])
-            ? $extra['wordpress-autoloader']['destination-prefix']
+        $extra         = $event->getComposer()->getPackage()->getExtra();
+        $classRoot     = isset($extra['wordpress-autoloader']['class-root'])
+            ? $extra['wordpress-autoloader']['class-root']
             : "ABSPATH";
+        $caseSensitive = isset($extra['wordpress-autoloader']['case-sensitive'])
+            ? (bool)$extra['wordpress-autoloader']['case-sensitive']
+            : true;
 
-        $generator = new AutoloadGenerator($sourcePrefix, $destinationPrefix);
+        $generator = new AutoloadGenerator($event->getIO(), $classRoot, $caseSensitive);
         $generator->dump($config, $localRepo, $package, $installationManager, 'composer', $optimize, $suffix);
     }
 }

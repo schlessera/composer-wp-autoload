@@ -8,7 +8,7 @@
  * @link      https://www.alainschlesser.com/
  * @copyright 2016 Alain Schlesser
  *
- * Based on xrstf/composer-php52 by Christoph Mewes.
+ * Partially based on xrstf/composer-php52 by Christoph Mewes.
  * @see       https://github.com/composer-php52/composer-php52
  */
 
@@ -30,6 +30,9 @@ class WordPress_Composer_ClassLoader
     private $classMap              = array();
     private $classMapAuthoratative = false;
     private $allowUnderscore       = false;
+
+    // This is replaced by the bool value found in "extra" key "case-sensitive".
+    private $caseSensitive = true;
 
     /**
      * @param boolean $flag true to allow class names with a leading underscore, false to disable
@@ -223,8 +226,12 @@ class WordPress_Composer_ClassLoader
             $class = substr($class, 1);
         }
 
-        if (isset($this->classMap[$class])) {
-            return $this->classMap[$class];
+        $classMapKey = $this->caseSensitive
+            ? $class
+            : mb_strtolower($class);
+
+        if (isset($this->classMap[$classMapKey])) {
+            return $this->classMap[$classMapKey];
         } elseif ($this->classMapAuthoratative) {
             return false;
         }
